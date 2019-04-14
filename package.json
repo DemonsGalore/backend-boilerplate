@@ -4,6 +4,7 @@
   "description": "Backend Boilerplate",
   "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "server": "nodemon server.js"
   },
   "repository": {
@@ -15,7 +16,9 @@
     "boilerplate",
     "express",
     "mongodb",
-    "graphql"
+    "graphql",
+    "jwt",
+    "passport"
   ],
   "author": "Andreas Stopat",
   "license": "MIT",

@@ -23,7 +23,7 @@ passport.use(
     },
     async (email, password, done) => {
       try {
-        const existingUser = await User.findOne({ email: email });
+        const existingUser = await User.findOne({ email: email.trim() });
         if (existingUser) {
           return done(null, false, { message: 'Email is already registered.' });
         } else {
@@ -52,7 +52,7 @@ passport.use(
     },
     async (email, password, done) => {
       try {
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: email.trim() });
         if (!user) {
           return done(null, false, { message: 'Email is not registered.' });
         } else {

@@ -9,35 +9,47 @@ const { secret, origin } = require('../../config/keys');
 // load user model
 const User = require('../../models/User');
 
-// TODO: async
 // @route       GET api/auth/register
 // @description register user
 // @access      public
-router.post('/register', (req, res, next) => {
-  passport.authenticate('register', (error, user, info) => {
-    if (error) console.log(error);
-    if (info !== undefined) {
-      res.status(403).send(info.message);
-    } else {
-      req.logIn(user, error => {
-        // adapt to values on registration
-        const { firstname, lastname, username } = req.body;
-        const userData = {
-          firstname,
-          lastname,
-          username,
-        };
-        User.findOneAndUpdate(
-          { email: user.email },
-          { $set: userData },
-          { new: false }
-        )
-        .then(() => {
-          res.status(200).send({ message: 'user created' });
+router.post('/register', async (req, res, next) => {
+  // check if username is already taken
+  const existingUsername = await User.findOne({ username: req.body.username.trim() });
+  if (!existingUsername) {
+    // if username is not registered proceed authentication
+    passport.authenticate('register', (error, user, info) => {
+      if (error) console.log(error);
+      if (info !== undefined) {
+        res.status(403).send(info.message);
+      } else {
+        req.logIn(user, error => {
+          // adapt to values on registration
+          const { firstname, lastname, username } = req.body;
+          const userData = {
+            username,
+            firstname,
+            lastname,
+          };
+          User.findOneAndUpdate(
+            { email: user.email },
+            { $set: userData },
+            { new: false }
+          )
+          .then(() => {
+            res.status(200).send({ message: 'user created' });
+          });
         });
-      });
+      }
+    })(req, res, next);
+  } else {
+    // check also email, if username is already taken for specified (error) message
+    const existingEmail = await User.findOne({ email: req.body.email.trim() });
+    if (existingEmail) {
+      res.status(403).send({ message: 'Email and username are already taken.' });
+    } else {
+      res.status(403).send({ message: 'Username is already taken.' });
     }
-  })(req, res, next);
+  }
 });
 
 // TODO: async
@@ -51,7 +63,7 @@ router.post('/login', (req, res, next) => {
       res.status(403).send(info.message);
     } else {
       req.logIn(user, error => {
-        User.findOne({ email: user.email })
+        User.findOne({ email: user.email.trim() })
           .then(user => {
             const { _id, username, email, firstname, lastname, role } = user;
             const jwtPayload = {
