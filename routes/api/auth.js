@@ -20,15 +20,15 @@ router.post('/register', async (req, res, next) => {
     passport.authenticate('register', (error, user, info) => {
       if (error) console.log(error);
       if (info !== undefined) {
-        res.status(403).send(info.message);
+        res.status(403).send({ message: info.message });
       } else {
         req.logIn(user, error => {
           // adapt to values on registration
           const { firstname, lastname, username } = req.body;
           const userData = {
-            username,
-            firstname,
-            lastname,
+            username: username.trim(),
+            firstname: firstname.trim(),
+            lastname: lastname.trim(),
           };
           User.findOneAndUpdate(
             { email: user.email },
@@ -60,7 +60,7 @@ router.post('/login', (req, res, next) => {
   passport.authenticate('login', (error, user, info) => {
     if (error) console.log(error);
     if (info !== undefined) {
-      res.status(403).send(info.message);
+      res.status(403).send({ message: info.message });
     } else {
       req.logIn(user, error => {
         User.findOne({ email: user.email.trim() })

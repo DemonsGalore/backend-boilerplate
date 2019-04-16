@@ -29,7 +29,7 @@ passport.use(
         } else {
           const hashedPassword = await bcrypt.hash(password, 12);
           const newUser = new User({
-            email,
+            email: email.trim(),
             password: hashedPassword,
           });
           const user = await newUser.save();
